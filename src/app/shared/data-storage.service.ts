@@ -18,4 +18,15 @@ export class DataStorageService {
         console.log(res);
       });
   }
+
+  fetchRecipes() {
+    this.http
+      .get<Recipe[]>(
+        'https://recipe-book-bbb97-default-rtdb.firebaseio.com/recipes.json'
+      )
+      .subscribe((recipes) => {
+        this.recipeService.setRecipes(recipes);
+        console.log(recipes);
+      });
+  }
 }
