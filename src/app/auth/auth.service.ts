@@ -1,7 +1,8 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, tap } from 'rxjs/operators';
-import { Subject, throwError } from 'rxjs';
+import { throwError, BehaviorSubject } from 'rxjs';
+
 import { User } from './user.model';
 
 export interface AuthResponseData {
@@ -9,14 +10,14 @@ export interface AuthResponseData {
   idToken: string;
   email: string;
   refreshToken: string;
-  expirseIn: string;
+  expiresIn: string;
   localId: string;
   registered?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  user = new Subject<User>();
+  user = new BehaviorSubject<User>(null);
 
   constructor(private http: HttpClient) {}
 
@@ -24,7 +25,6 @@ export class AuthService {
     return this.http
       .post<AuthResponseData>(
         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD2kVtXha9AdHa4rF8HC2Uuv9rGgIvcEEA',
-
         {
           email: email,
           password: password,
@@ -38,7 +38,7 @@ export class AuthService {
             resData.email,
             resData.localId,
             resData.idToken,
-            +resData.expirseIn
+            +resData.expiresIn
           );
         })
       );
@@ -61,7 +61,7 @@ export class AuthService {
             resData.email,
             resData.localId,
             resData.idToken,
-            +resData.expirseIn
+            +resData.expiresIn
           );
         })
       );
@@ -69,34 +69,31 @@ export class AuthService {
 
   private handleAuthentication(
     email: string,
-    token: string,
     userId: string,
-    expirseIn: number
+    token: string,
+    expiresIn: number
   ) {
-    const expirationDate = new Date(new Date().getTime() + expirseIn * 1000);
+    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
     const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
   }
 
   private handleError(errorRes: HttpErrorResponse) {
-    let errorMesseage = 'an unkown error occurred!';
+    let errorMessage = 'An unknown error occurred!';
     if (!errorRes.error || !errorRes.error.error) {
-      return throwError(errorMesseage);
+      return throwError(errorMessage);
     }
     switch (errorRes.error.error.message) {
       case 'EMAIL_EXISTS':
-        errorMesseage = 'this email exists already';
-        break;
-      case 'USER_DISABLED':
-        errorMesseage = 'this user is disabled';
+        errorMessage = 'This email exists already';
         break;
       case 'EMAIL_NOT_FOUND':
-        errorMesseage = 'this email not found';
+        errorMessage = 'This email does not exist.';
         break;
       case 'INVALID_PASSWORD':
-        errorMesseage = 'this password is invalid';
+        errorMessage = 'This password is not correct.';
         break;
     }
-    return throwError(errorMesseage);
+    return throwError(errorMessage);
   }
 }
