@@ -10,7 +10,6 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { AuthComponent } from './auth/auth.component';
 import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
-import { RecipesModule } from './recipes/recipes.module';
 import { ShoppingListModule } from './shopping-list/shopping-list.module';
 import { CoreModule } from './core.module';
 
@@ -28,7 +27,6 @@ import { CoreModule } from './core.module';
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    RecipesModule,
     ShoppingListModule,
     CoreModule,
   ],
